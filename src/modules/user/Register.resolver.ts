@@ -23,23 +23,31 @@ export class RegisterResolver {
   ): Promise<LoginResponse> {
     let user
 
+    // Issue 103: Prevent Email verification
+    // using confirmed flag to decide if user has to be verfied
+    // just comment below line to start verfication
+    const confirmed = true
+
     try {
       user = await User.create({
         name,
         email,
         username,
         password, // hashing this in @BeforeInsert hook in User.entity.ts
+        confirmed,
       }).save()
     } catch (e) {
       console.error(e)
       throw new Error('Error while registering user')
     }
 
-    sendEmail(
-      email,
-      await createConfirmationUrl(user.id),
-      MailType.ConfirmationEmail
-    )
+    if (!user.confirmed) {
+      sendEmail(
+        email,
+        await createConfirmationUrl(user.id),
+        MailType.ConfirmationEmail
+      )
+    }
 
     sendRefreshToken(res, createRefreshToken(user))
     sendAccessToken(res, createAccessToken(user.id))
