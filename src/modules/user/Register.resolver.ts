@@ -26,7 +26,7 @@ export class RegisterResolver {
     // Issue 103: Prevent Email verification
     // using confirmed flag to decide if user has to be verfied
     // just comment below line to start verfication
-    const confirmed = true
+    let confirmed = true
 
     try {
       user = await User.create({
